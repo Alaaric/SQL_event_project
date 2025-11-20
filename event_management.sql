@@ -1,3 +1,4 @@
+DROP DATABASE IF EXISTS event_management;
 CREATE DATABASE event_management;
 USE event_management;
 
@@ -112,27 +113,55 @@ BEGIN
 END $$
 
 
--- Supprimer un événement + toutes ses inscriptions
-DROP PROCEDURE IF EXISTS supprimer_evenement $$
-CREATE PROCEDURE supprimer_evenement (
-    IN p_evenement_id INT
+-- Supprimer un événement (avec ses inscriptions)
+DELIMITER //
+CREATE PROCEDURE SupprimerEvenement(IN p_evenement_id INT)
+BEGIN
+    DELETE FROM inscriptions WHERE evenement_id = p_evenement_id;
+    DELETE FROM evenements WHERE id = p_evenement_id;
+END //
+DELIMITER ;
+
+-- Ajouter les procédures avec les noms attendus par l'app
+DELIMITER $$
+
+DROP PROCEDURE IF EXISTS CreerEvenement $$
+CREATE PROCEDURE CreerEvenement (
+    IN p_nom VARCHAR(255),
+    IN p_date_debut DATETIME,
+    IN p_date_fin DATETIME,
+    IN p_personnes_maximum INT,
+    IN p_lieu VARCHAR(255),
+    OUT p_evenement_id INT
 )
 BEGIN
-    START TRANSACTION;
-
-    DELETE FROM inscriptions
-    WHERE evenement_id = p_evenement_id;
-
-    DELETE FROM evenements
-    WHERE id = p_evenement_id;
-
-    COMMIT;
+    INSERT INTO evenements (nom, date_creation, date_debut, date_fin, personnes_maximum, lieu)
+    VALUES (p_nom, NOW(), p_date_debut, p_date_fin, p_personnes_maximum, p_lieu);
+    
+    SET p_evenement_id = LAST_INSERT_ID();
 END $$
 
+DROP PROCEDURE IF EXISTS InscrirePersonne $$
+CREATE PROCEDURE InscrirePersonne (
+    IN p_evenement_id INT,
+    IN p_prenom VARCHAR(100),
+    IN p_nom VARCHAR(100)
+)
+BEGIN
+    INSERT INTO inscriptions (evenement_id, prenom, nom, date_inscription)
+    VALUES (p_evenement_id, p_prenom, p_nom, NOW());
+END $$
 
--- Changer les dates d’un événement
-DROP PROCEDURE IF EXISTS changer_dates_evenement $$
-CREATE PROCEDURE changer_dates_evenement (
+DROP PROCEDURE IF EXISTS DesinscrirePersonne $$
+CREATE PROCEDURE DesinscrirePersonne (
+    IN p_inscription_id INT
+)
+BEGIN
+    DELETE FROM inscriptions WHERE id = p_inscription_id;
+END $$
+
+DROP PROCEDURE IF EXISTS ModifierDatesEvenement $$
+CREATE PROCEDURE ModifierDatesEvenement (
     IN p_evenement_id INT,
     IN p_nouvelle_date_debut DATETIME,
     IN p_nouvelle_date_fin DATETIME
@@ -146,8 +175,3 @@ END $$
 
 DELIMITER ;
 
--- Création de l'utilisateur SGBDR restreint
-CREATE USER 'event_app'@'localhost' IDENTIFIED BY 'unMotDePasse';
-
-GRANT SELECT ON event_management.* TO 'event_app'@'localhost';
-GRANT EXECUTE ON event_management.* TO 'event_app'@'localhost';
