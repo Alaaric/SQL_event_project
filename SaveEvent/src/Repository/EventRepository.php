@@ -4,11 +4,13 @@ namespace EventManager\Repository;
 
 use MongoDB\Client;
 use MongoDB\Collection;
-use MongoDB\Driver\Exception\BulkWriteException;
+use MongoDB\Database;
 use EventManager\Exception\DuplicateEventException;
+use EventManager\Schema\ValidationSchemas;
 
 class EventRepository
 {
+    private const string COLLECTION_NAME = 'events';
     private Collection $collection;
 
     public function __construct()
@@ -17,7 +19,12 @@ class EventRepository
         $database = $_ENV['MONGODB_DATABASE'];
 
         $client = new Client($host);
-        $this->collection = $client->$database->events;
+        $db = $client->$database;
+
+        if (!$this->collectionExists($db)) {
+            $this->createCollection($db);
+        }
+        $this->collection = $db->selectCollection(self::COLLECTION_NAME);
         $this->createUniqueIndex();
     }
 
@@ -34,9 +41,40 @@ class EventRepository
         try {
             $result = $this->collection->insertOne($document);
             return (string)$result->getInsertedId();
-        } catch (BulkWriteException $e) {
-            throw new DuplicateEventException("Event already exists with hash: $hash");
+        } catch (\Exception $e) {
+            $code = $e->getCode();
+
+            /** On peut pas differencier les catch car nous avons dans ces 2 cas une BulkWriteException, on peu se fier que au code de retour */
+
+            if ($code === 11000) {
+                throw new DuplicateEventException("Event already exists with hash: $hash");
+            }
+
+            if ($code === 121) {
+                throw new \InvalidArgumentException("Document validation failed: " . $e->getMessage());
+            }
+
+            throw new \RuntimeException("Write operation in database failed: " . $e->getMessage());
         }
+    }
+
+    private function createCollection(Database $db): void
+    {
+        $db->createCollection(self::COLLECTION_NAME, [
+            'validator' => ValidationSchemas::getEventSchema(),
+            'validationLevel' => 'strict',
+            'validationAction' => 'error'
+        ]);
+    }
+
+    private function collectionExists(Database $db): bool
+    {
+        foreach ($db->listCollectionNames() as $name) {
+            if ($name === self::COLLECTION_NAME) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private function createUniqueIndex(): void
