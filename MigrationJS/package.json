@@ -1,0 +1,19 @@
+{
+  "name": "migration-js",
+  "version": "1.0.0",
+  "description": "Migration MongoDB vers MySQL en JavaScript",
+  "main": "src/index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node src/index.js",
+    "migrate": "node src/index.js"
+  },
+  "dependencies": {
+    "mongodb": "^6.3.0",
+    "mysql2": "^3.6.5",
+    "dotenv": "^16.3.1"
+  },
+  "keywords": ["migration", "mongodb", "mysql", "node.js"],
+  "author": "",
+  "license": "MIT"
+}
