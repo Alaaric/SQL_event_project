@@ -51,42 +51,41 @@
                     <button type="submit" onclick="return confirm('Supprimer ?')"> Supprimer</button>
                 </form>
 
-                <a href="?event_id=<?= $event->id ?>">Gérer inscriptions</a>
+                <details <?= ($selectedEventId == $event->id) ? 'open' : '' ?>>
+                    <summary>Gérer inscriptions (<?= isset($inscriptions) && $selectedEventId == $event->id ? count($inscriptions) : '...' ?>)</summary>
+
+                    <?php if ($selectedEventId == $event->id): ?>
+                        <div style="margin: 10px 0; padding: 10px; background: #f8f9fa; border-radius: 5px;">
+                            <h4>Inscrire une personne</h4>
+                            <form method="post" action="?action=inscribe">
+                                <input type="hidden" name="evenement_id" value="<?= $event->id ?>">
+                                <input type="text" name="prenom" placeholder="Prénom" required>
+                                <input type="text" name="nom" placeholder="Nom" required>
+                                <button type="submit">Inscrire</button>
+                            </form>
+
+                            <h4>Participants (<?= count($inscriptions) ?>)</h4>
+                            <?php if (!empty($inscriptions)): ?>
+                                <?php foreach ($inscriptions as $inscription): ?>
+                                    <div style="border: 1px solid #eee; margin: 5px; padding: 5px; background: white;">
+                                        <?= htmlspecialchars($inscription->prenom) ?> <?= htmlspecialchars($inscription->nom) ?>
+                                        <em>(<?= $inscription->dateInscription->format('Y-m-d') ?>)</em>
+                                        <form method="post" action="?action=unsubscribe" style="display: inline;">
+                                            <input type="hidden" name="inscription_id" value="<?= $inscription->id ?>">
+                                            <button type="submit" style="margin-left: 10px;">supprimer</button>
+                                        </form>
+                                    </div>
+                                <?php endforeach; ?>
+                            <?php else: ?>
+                                <p><em>Aucun participant inscrit</em></p>
+                            <?php endif; ?>
+                        </div>
+                    <?php else: ?>
+                        <p><a href="?event_id=<?= $event->id ?>">Cliquez pour voir les inscriptions</a></p>
+                    <?php endif; ?>
+                </details>
             </div>
         <?php endforeach; ?>
-
-        <?php if ($selectedEventId): ?>
-            <?php $selectedEvent = null; ?>
-            <?php foreach ($events as $e) {
-                if ($e->id == $selectedEventId) {
-                    $selectedEvent = $e;
-                    break;
-                }
-            } ?>
-
-            <h2>Inscriptions pour "<?= htmlspecialchars($selectedEvent->nom) ?>"</h2>
-
-            <form method="post" action="?action=inscribe">
-                <input type="hidden" name="evenement_id" value="<?= $selectedEventId ?>">
-                <input type="text" name="prenom" placeholder="Prénom" required>
-                <input type="text" name="nom" placeholder="Nom" required>
-                <button type="submit">Inscrire</button>
-            </form>
-
-            <h3>Participants (<?= count($inscriptions) ?>)</h3>
-            <?php foreach ($inscriptions as $inscription): ?>
-                <div style="border: 1px solid #eee; margin: 5px; padding: 5px;">
-                    <?= htmlspecialchars($inscription->prenom) ?> <?= htmlspecialchars($inscription->nom) ?>
-                    <em>(<?= $inscription->dateInscription->format('Y-m-d') ?>)</em>
-                    <form method="post" action="?action=unsubscribe" style="display: inline;">
-                        <input type="hidden" name="inscription_id" value="<?= $inscription->id ?>">
-                        <button type="submit">supprimer</button>
-                    </form>
-                </div>
-            <?php endforeach; ?>
-
-            <p><a href="?">Retour aux événements</a></p>
-        <?php endif; ?>
     <?php endif; ?>
 </body>
 

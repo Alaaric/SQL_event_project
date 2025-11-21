@@ -32,15 +32,26 @@ export class EventMigrator {
 
         inscriptions.forEach(async inscription => {
             try {
-                await this.mysqlConnection.createInscription(
-                    eventId,
-                    inscription.prenom,
-                    inscription.nom
-                );
+                if (inscription.dateInscription) {
+                    await this.mysqlConnection.createInscriptionWithDate(
+                        eventId,
+                        inscription.prenom,
+                        inscription.nom,
+                        inscription.dateInscription
+                    );
+                } else {
+                    await this.mysqlConnection.createInscription(
+                        eventId,
+                        inscription.prenom,
+                        inscription.nom
+                    );
+                }
             } catch (error) {
                 console.warn(`Inscription error:`, error.message);
             }
         });
+
+        await this.mongoConnection.markAsMigrated(rawEvent._id);
 
         return eventId;
     }

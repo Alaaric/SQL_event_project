@@ -31,13 +31,6 @@ class MySQLInscriptionRepository implements InscriptionRepositoryInterface
         $stmt = $this->pdo->prepare('CALL InscrirePersonne(?, ?, ?)');
         $stmt->execute([$inscriptionDTO->evenementId, $inscriptionDTO->prenom, $inscriptionDTO->nom]);
 
-        $stmt = $this->pdo->prepare('
-            SELECT * FROM inscriptions 
-            WHERE evenement_id = ? AND prenom = ? AND nom = ? 
-            ORDER BY date_inscription DESC 
-            LIMIT 1
-        ');
-        $stmt->execute([$inscriptionDTO->evenementId, $inscriptionDTO->prenom, $inscriptionDTO->nom]);
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
 
         return new Inscription(
@@ -51,7 +44,27 @@ class MySQLInscriptionRepository implements InscriptionRepositoryInterface
 
     public function delete(int $inscriptionId): void
     {
-        $stmt = $this->pdo->prepare('CALL DesinscrirePersonne(?)');
+        $stmt = $this->pdo->prepare('SELECT prenom, nom FROM inscriptions WHERE id = ?');
         $stmt->execute([$inscriptionId]);
+        $inscription = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        $stmt = $this->pdo->prepare('CALL DesinscrirePersonne(?, ?)');
+        $stmt->execute([$inscription['prenom'], $inscription['nom']]);
+    }
+
+    public function createWithCustomDate(int $eventId, string $prenom, string $nom, string $dateInscription): Inscription
+    {
+        $stmt = $this->pdo->prepare('CALL InscrirePersonneMigration(?, ?, ?, ?)');
+        $stmt->execute([$eventId, $prenom, $nom, $dateInscription]);
+
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        return new Inscription(
+            $row['id'],
+            $row['evenement_id'],
+            $row['prenom'],
+            $row['nom'],
+            new \DateTime($row['date_inscription'])
+        );
     }
 }

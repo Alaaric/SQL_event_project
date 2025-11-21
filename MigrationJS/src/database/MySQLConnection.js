@@ -32,4 +32,11 @@ export class MySQLConnection {
             [eventId, prenom, nom]
         );
     }
+
+    async createInscriptionWithDate(eventId, prenom, nom, dateInscription) {
+        await this.connection.execute(
+            'CALL InscrirePersonneMigration(?, ?, ?, ?)',
+            [eventId, prenom, nom, dateInscription]
+        );
+    }
 }

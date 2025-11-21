@@ -34,6 +34,9 @@ class MongoToMySQLMigrator
             try {
                 $normalizedData = $this->normalizeEvent($eventArray);
                 $this->createEventWithInscriptions($normalizedData);
+
+                $this->mongoEventRepository->markAsMigrated($eventArray['_id_object']);
+
                 $migrated++;
             } catch (\Exception $e) {
                 $errors[] = $e->getMessage();
@@ -73,7 +76,17 @@ class MongoToMySQLMigrator
                 $attendee['nom']
             );
 
-            $this->inscriptionRepository->create($inscriptionDTO);
+            // Utiliser la date d'inscription MongoDB si disponible
+            if (isset($attendee['date_inscription']) && $attendee['date_inscription']) {
+                $this->inscriptionRepository->createWithCustomDate(
+                    $createdEvent->id,
+                    $attendee['prenom'],
+                    $attendee['nom'],
+                    $attendee['date_inscription']
+                );
+            } else {
+                $this->inscriptionRepository->create($inscriptionDTO);
+            }
         }
     }
 }
