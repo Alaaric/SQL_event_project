@@ -26,7 +26,7 @@
         <input type="text" name="nom" placeholder="Nom" required>
         <input type="datetime-local" name="date_debut" required>
         <input type="datetime-local" name="date_fin" required>
-        <input type="number" name="personnes_maximum" placeholder="Max personnes" required>
+        <input type="number" name="personnes_maximum" placeholder="Max personnes (optionnel)">
         <input type="text" name="lieu" placeholder="Lieu" required>
         <button type="submit">Créer</button>
     </form>
@@ -37,7 +37,7 @@
             <div style="border: 1px solid #ccc; margin: 10px; padding: 10px;">
                 <h3><?= htmlspecialchars($event->nom) ?></h3>
                 <p> <?= $event->dateDebut->format('Y-m-d H:i') ?> → <?= $event->dateFin->format('Y-m-d H:i') ?></p>
-                <p> <?= htmlspecialchars($event->lieu) ?> (Max: <?= $event->personnesMaximum ?>)</p>
+                <p> <?= htmlspecialchars($event->lieu) ?> (Max: <?= $event->personnesMaximum ?? 'non renseigné' ?>)</p>
 
                 <form method="post" action="?action=update_dates" style="display: inline;">
                     <input type="hidden" name="id" value="<?= $event->id ?>">

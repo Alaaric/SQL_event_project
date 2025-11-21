@@ -9,7 +9,7 @@ CREATE TABLE IF NOT EXISTS evenements (
     date_creation DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     date_debut DATETIME NOT NULL,
     date_fin DATETIME NOT NULL,
-    personnes_maximum INT NOT NULL,
+    personnes_maximum INT NULL,
     lieu VARCHAR(255) NOT NULL
 );
 

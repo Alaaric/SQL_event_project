@@ -14,19 +14,19 @@ class LiveTicketNormalizer implements EventNormalizerInterface
         return [
             'nom' => $eventData['event'],
             'date_debut' => $eventData['start'],
-            'date_fin' => $eventData['end'] ?? $eventData['start'],
-            'personnes_maximum' => $eventData['max'] ?? 0,
-            'lieu' => $eventData['where'] ?? '',
-            'attendees' => $this->normalizeAttendees($eventData['attendees'] ?? [])
+            'date_fin' => $eventData['end'],
+            'personnes_maximum' => $eventData['max'],
+            'lieu' => $eventData['where'],
+            'attendees' => $this->normalizeAttendees($eventData['attendees'])
         ];
     }
 
     private function normalizeAttendees(array $attendees): array
     {
         $normalized = [];
-        foreach ($attendees as $att) {
-            if (isset($att['fn'], $att['ln'])) {
-                $normalized[] = ['prenom' => $att['fn'], 'nom' => $att['ln']];
+        foreach ($attendees as $attendee) {
+            if (isset($attendee['fn'], $attendee['ln'])) {
+                $normalized[] = ['prenom' => $attendee['fn'], 'nom' => $attendee['ln']];
             }
         }
         return $normalized;

@@ -5,9 +5,11 @@ Système de gestion d'événements avec import MongoDB et interface web MySQL.
 ## Prérequis
 
 - **PHP 8.3** minimum
+- **Node.js 18+** (pour la migration CLI JS)
 - **MongoDB**
 - **MySQL**
 - **Composer**
+- **npm**
 - **Make** (optionnel mais recommandé)
 
 ## Installation rapide
@@ -44,6 +46,13 @@ cd WebApp
 composer install
 cp .env .env.local  # Ajuster si nécessaire
 php bin/init-db.php
+```
+
+3. **MigrationJS** (CLI Node.js) :
+```bash
+cd MigrationJS
+npm install
+cp .env .env.local  # Ajuster si nécessaire
 ```
 
 ## Utilisation
