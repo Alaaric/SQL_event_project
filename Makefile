@@ -1,4 +1,4 @@
-.PHONY: help install init-db start migrate
+.PHONY: help install init-db start migrate migrate-js import
 
 IMPORT_FILE ?= SaveEvent/samples/event1.json
 
@@ -8,7 +8,7 @@ help:
 	@echo "  make init-db    - Initialiser la base MySQL"
 	@echo "  make start      - Démarrer l'application web"
 	@echo "  make import     - Importer un événement (IMPORT_FILE=...)"
-	@echo "  make migrate    - Instructions pour la migration"
+	@echo "  make migrate    - Migration CLI (Node.js)"
 	@echo "  make help       - Afficher cette aide"
 
 install:
@@ -16,6 +16,8 @@ install:
 	@cd SaveEvent && composer install
 	@echo "Installation WebApp"
 	@cd WebApp && composer install
+	@echo "Installation MigrationJS"
+	@cd MigrationJS && npm install
 	@echo " Installation terminée"
 
 init-db:
@@ -30,7 +32,6 @@ import:
 	@echo "Import de l'événement: $(IMPORT_FILE)"
 	@cd SaveEvent && ./bin/import-event.php "../$(IMPORT_FILE)"
 
-migrate: ## Instructions pour la migration
-	@echo "🔄 Migration MongoDB vers MySQL:"
-	@echo "1. Assurez-vous que l'app web est démarrée (make start)"
-	@echo "2. Accédez à http://localhost:8000/?action=migrate"
+migrate:
+	@echo "Migration MongoDB vers MySQL (CLI)"
+	@cd MigrationJS && node src/index.js

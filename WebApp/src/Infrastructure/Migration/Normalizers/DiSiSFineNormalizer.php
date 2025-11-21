@@ -14,10 +14,10 @@ class DiSiSFineNormalizer implements EventNormalizerInterface
         return [
             'nom' => $eventData['e_name'],
             'date_debut' => $eventData['e_start'],
-            'date_fin' => $eventData['e_finish'] ?? $eventData['e_start'],
-            'personnes_maximum' => $eventData['e_attendees_max'] ?? 0,
-            'lieu' => $eventData['e_location'] ?? '',
-            'attendees' => $this->normalizeAttendees($eventData['attendees'] ?? '')
+            'date_fin' => $eventData['e_finish'],
+            'personnes_maximum' => $eventData['e_attendees_max'],
+            'lieu' => $eventData['e_location'],
+            'attendees' => $this->normalizeAttendees($eventData['attendees'])
         ];
     }
 

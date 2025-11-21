@@ -5,9 +5,11 @@ Système de gestion d'événements avec import MongoDB et interface web MySQL.
 ## Prérequis
 
 - **PHP 8.3** minimum
+- **Node.js 18+** (pour la migration CLI JS)
 - **MongoDB**
 - **MySQL**
 - **Composer**
+- **npm**
 - **Make** (optionnel mais recommandé)
 
 ## Installation rapide
@@ -44,6 +46,13 @@ cd WebApp
 composer install
 cp .env .env.local  # Ajuster si nécessaire
 php bin/init-db.php
+```
+
+3. **MigrationJS** (CLI Node.js) :
+```bash
+cd MigrationJS
+npm install
+cp .env .env.local  # Ajuster si nécessaire
 ```
 
 ## Utilisation
@@ -89,26 +98,41 @@ make import IMPORT_FILE=SaveEvent/samples/TRUEGISTER_format.json
 ```
 ### Migration MongoDB → MySQL
 
+**Option 1 : Interface Web (PHP)**
 1. Importer des événements dans MongoDB (SaveEvent)
 2. Démarrer l'application web (`make start`)
 3. Accéder à http://localhost:8000/?action=migrate
+
+**Option 2 : CLI Node.js**
+```bash
+# Avec Makefile
+make migrate
+
+# Manuellement
+cd MigrationJS && node src/index.js
+```
 
 ## Architecture
 
 ```
 SQL_event_project/
 ├── SaveEvent/         # Module MongoDB (import JSON)
-│   ├── bin/           # Scripts CLI
-│   ├── src/           # Code métier
-│   └── samples/       # Exemples JSON
+│   ├── bin/           # Scripts CLI PHP
+│   ├── src/           # Code métier (Repository, validation MongoDB)
+│   └── samples/       # Exemples JSON (3 formats)
 ├── WebApp/            # Application web MySQL
 │   ├── public/        # Point d'entrée web
 │   ├── src/           
 │   │   ├── Domain/    # Entités et interfaces
-│   │   └── Infrastructure/ # Controllers, repos, vues
-│   └── bin/           # Scripts CLI
-├── Makefile           # Commandes
-└── event_management.sql # Schéma de base
+│   │   └── Infrastructure/ # Controllers, repos, vues, normalizers
+│   └── bin/           # Scripts CLI PHP
+├── MigrationJS/       # Migration CLI Node.js
+│   └── src/
+│       ├── database/  # Connexions MongoDB/MySQL
+│       ├── migrator/  # Logique de migration
+│       └── normalizers/ # Transformation des formats 
+├── Makefile           # Commandes unifiées
+└── event_management.sql # Schéma MySQL
 ```
 
 ## Commandes Make
@@ -119,4 +143,5 @@ make install    # Installation complète des 2 modules
 make init-db    # Initialisation MySQL
 make start      # Démarrage serveur web
 make import IMPORT_FILE=fichier.json # Import d'événement dans MongoDB
+make migrate
 ```

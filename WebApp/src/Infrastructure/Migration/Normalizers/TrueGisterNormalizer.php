@@ -11,13 +11,13 @@ class TrueGisterNormalizer implements EventNormalizerInterface
 
     public function normalize(array $eventData): array
     {
-        $evt = $eventData['results'][0]['event'];
+        $event = $eventData['results'][0]['event'];
         return [
-            'nom' => $evt['event_name'],
-            'date_debut' => $evt['event_begin'],
-            'date_fin' => $evt['event_finish'] ?? $evt['event_begin'],
-            'personnes_maximum' => 0,
-            'lieu' => $evt['event_where'] ?? '',
+            'nom' => $event['event_name'],
+            'date_debut' => $event['event_begin'],
+            'date_fin' => $event['event_finish'],
+            'personnes_maximum' => null,
+            'lieu' => $event['event_where'] ?? '',
             'attendees' => $this->normalizeAttendees($eventData['results'][0]['attendees'] ?? [])
         ];
     }
@@ -25,9 +25,9 @@ class TrueGisterNormalizer implements EventNormalizerInterface
     private function normalizeAttendees(array $attendees): array
     {
         $normalized = [];
-        foreach ($attendees as $att) {
-            if (isset($att['attendee_1'], $att['attendee_2'])) {
-                $normalized[] = ['prenom' => $att['attendee_1'], 'nom' => $att['attendee_2']];
+        foreach ($attendees as $attendee) {
+            if (isset($attendee['attendee_1'], $attendee['attendee_2'])) {
+                $normalized[] = ['prenom' => $attendee['attendee_1'], 'nom' => $attendee['attendee_2']];
             }
         }
         return $normalized;
