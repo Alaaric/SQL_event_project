@@ -58,6 +58,25 @@ cp .env .env.local  # Ajuster si nécessaire
 
 ## Utilisation
 
+### Import d'événements (SaveEvent)
+
+Import de fichiers JSON vers MongoDB :
+
+```bash
+# Avec Makefile
+make import IMPORT_FILE=mon_fichier.json
+
+# Manuellement
+cd SaveEvent
+./bin/import-event.php samples/event1.json
+```
+Commandes Make pour les 3 fichiers de tests differents :
+```bash
+make import IMPORT_FILE=SaveEvent/samples/DISISFINE_format.json
+make import IMPORT_FILE=SaveEvent/samples/LIVETICKET_format.json
+make import IMPORT_FILE=SaveEvent/samples/TRUEGISTER_format.json
+```
+
 ### Interface Web (WebApp)
 
 L'application web permet de gérer les événements et inscriptions de la BDD MySQL via une interface graphique, ainsi qu'un bouton pour importer les donnée de MongoDB vers MySQL.
@@ -79,24 +98,6 @@ cd WebApp && php -S localhost:8000 -t public
 
 **URL :** http://localhost:8000
 
-### Import d'événements (SaveEvent)
-
-Import de fichiers JSON vers MongoDB :
-
-```bash
-# Avec Makefile
-make import IMPORT_FILE=mon_fichier.json
-
-# Manuellement
-cd SaveEvent
-./bin/import-event.php samples/event1.json
-```
-Commandes Make pour les 3 fichiers de tests differents :
-```bash
-make import IMPORT_FILE=SaveEvent/samples/DISISFINE_format.json
-make import IMPORT_FILE=SaveEvent/samples/LIVETICKET_format.json
-make import IMPORT_FILE=SaveEvent/samples/TRUEGISTER_format.json
-```
 ### Migration MongoDB → MySQL
 
 **Option 1 : Interface Web (PHP)**
