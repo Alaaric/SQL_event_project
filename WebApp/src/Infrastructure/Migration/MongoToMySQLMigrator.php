@@ -76,17 +76,10 @@ class MongoToMySQLMigrator
                 $attendee['nom']
             );
 
-            // Utiliser la date d'inscription MongoDB si disponible
-            if (isset($attendee['date_inscription']) && $attendee['date_inscription']) {
-                $this->inscriptionRepository->createWithCustomDate(
-                    $createdEvent->id,
-                    $attendee['prenom'],
-                    $attendee['nom'],
-                    $attendee['date_inscription']
-                );
-            } else {
-                $this->inscriptionRepository->create($inscriptionDTO);
-            }
+            $this->inscriptionRepository->create(
+                $inscriptionDTO,
+                $attendee['date_inscription'] ?? null
+            );
         }
     }
 }

@@ -60,12 +60,12 @@ DROP PROCEDURE IF EXISTS InscrirePersonne //
 CREATE PROCEDURE InscrirePersonne (
     IN event_id INT,
     IN first_name VARCHAR(100),
-    IN last_name VARCHAR(100)
+    IN last_name VARCHAR(100),
+    IN registration_date DATETIME
 )
 BEGIN
     DECLARE limite_participants INT;
     DECLARE nb_participants_actuels INT;
-    DECLARE date_inscription DATETIME;
 
     -- On check en amont si notre evenement existe bien même si la FK devrait déjà le faire à l'insertion
     IF NOT EXISTS (SELECT 1 FROM evenements WHERE id = event_id) THEN
@@ -85,7 +85,7 @@ BEGIN
         WHERE evenement_id = event_id;
 
         IF nb_participants_actuels >= limite_participants THEN
-            SIGNAL SQLSTATE '45000'
+            SIGNAL SQLSTATE '45001'
                 SET MESSAGE_TEXT = 'Nombre maximum de personnes deja atteint';
         END IF;
     END IF;
@@ -95,31 +95,47 @@ BEGIN
                WHERE evenement_id = event_id 
                AND prenom = first_name 
                AND nom = last_name) THEN
-        SIGNAL SQLSTATE '45000'
+        SIGNAL SQLSTATE '45002'
             SET MESSAGE_TEXT = 'Cette personne est deja inscrite a cet evenement';
     END IF;
-
-    SET date_inscription = NOW();
     
-    INSERT INTO inscriptions (
+    -- Si on a la date, on l'utilise, sinon on laisse MySQL mettre le DEFAULT.
+    -- Est-ce propre de laisser la table gérer cette valeur par defaut? pas sûr ¯\_(ツ)_/¯
+    IF registration_date IS NOT NULL THEN
+        INSERT INTO inscriptions (
+            evenement_id,
+            prenom,
+            nom,
+            date_inscription
+        )
+        VALUES (
+            event_id,
+            first_name,
+            last_name,
+            registration_date
+        );
+    ELSE
+        INSERT INTO inscriptions (
+            evenement_id,
+            prenom,
+            nom
+        )
+        VALUES (
+            event_id,
+            first_name,
+            last_name
+        );
+    END IF;
+    
+    -- Récupérer la date réellement insérée (soit celle fournie, soit NOW() via DEFAULT)
+    SELECT 
+        id,
         evenement_id,
         prenom,
         nom,
         date_inscription
-    )
-    VALUES (
-        event_id,
-        first_name,
-        last_name,
-        date_inscription
-    );
-    
-    SELECT 
-        LAST_INSERT_ID() as id,
-        event_id as evenement_id,
-        first_name as prenom,
-        last_name as nom,
-        date_inscription as date_inscription;
+    FROM inscriptions
+    WHERE id = LAST_INSERT_ID();
 END //
 
 
@@ -155,36 +171,6 @@ BEGIN
     SET date_debut = new_start_date,
         date_fin   = new_end_date
     WHERE id = event_id;
-END //
-
--- Procédure spéciale pour migration pour gérer les dates d'inscription déjà présente dans mongoDB
-DROP PROCEDURE IF EXISTS InscrirePersonneMigration //
-CREATE PROCEDURE InscrirePersonneMigration (
-    IN event_id INT,
-    IN first_name VARCHAR(100),
-    IN last_name VARCHAR(100),
-    IN registration_date DATETIME
-)
-BEGIN
-    INSERT INTO inscriptions (
-        evenement_id,
-        prenom,
-        nom,
-        date_inscription
-    )
-    VALUES (
-        event_id,
-        first_name,
-        last_name,
-        registration_date
-    );
-    
-    SELECT 
-        LAST_INSERT_ID() as id,
-        event_id as evenement_id,
-        first_name as prenom,
-        last_name as nom,
-        registration_date as date_inscription;
 END //
 
 DELIMITER ;

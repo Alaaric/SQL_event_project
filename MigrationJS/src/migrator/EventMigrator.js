@@ -32,20 +32,12 @@ export class EventMigrator {
 
         inscriptions.forEach(async inscription => {
             try {
-                if (inscription.dateInscription) {
-                    await this.mysqlConnection.createInscriptionWithDate(
-                        eventId,
-                        inscription.prenom,
-                        inscription.nom,
-                        inscription.dateInscription
-                    );
-                } else {
-                    await this.mysqlConnection.createInscription(
-                        eventId,
-                        inscription.prenom,
-                        inscription.nom
-                    );
-                }
+                await this.mysqlConnection.createInscription(
+                    eventId,
+                    inscription.prenom,
+                    inscription.nom,
+                    inscription.dateInscription || null
+                );
             } catch (error) {
                 console.warn(`Inscription error:`, error.message);
             }

@@ -3,9 +3,12 @@
 namespace EventApp\Infrastructure\Repository;
 
 use EventApp\Domain\Entity\Inscription;
+use EventApp\Domain\Exception\EventFullException;
+use EventApp\Domain\Exception\PersonAlreadyRegisteredException;
 use EventApp\Domain\Interfaces\InscriptionRepositoryInterface;
 use EventApp\Infrastructure\DTO\CreateInscriptionDTO;
 use PDO;
+use PDOException;
 
 class MySQLInscriptionRepository implements InscriptionRepositoryInterface
 {
@@ -26,20 +29,30 @@ class MySQLInscriptionRepository implements InscriptionRepositoryInterface
         ), $results);
     }
 
-    public function create(CreateInscriptionDTO $inscriptionDTO): Inscription
+    public function create(CreateInscriptionDTO $inscriptionDTO, ?string $dateInscription = null): Inscription
     {
-        $stmt = $this->pdo->prepare('CALL InscrirePersonne(?, ?, ?)');
-        $stmt->execute([$inscriptionDTO->evenementId, $inscriptionDTO->prenom, $inscriptionDTO->nom]);
+        try {
+            $stmt = $this->pdo->prepare('CALL InscrirePersonne(?, ?, ?, ?)');
+            $stmt->execute([$inscriptionDTO->evenementId, $inscriptionDTO->prenom, $inscriptionDTO->nom, $dateInscription]);
 
-        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+            $row = $stmt->fetch(PDO::FETCH_ASSOC);
 
-        return new Inscription(
-            $row['id'],
-            $row['evenement_id'],
-            $row['prenom'],
-            $row['nom'],
-            new \DateTime($row['date_inscription'])
-        );
+            return new Inscription(
+                $row['id'],
+                $row['evenement_id'],
+                $row['prenom'],
+                $row['nom'],
+                new \DateTime($row['date_inscription'])
+            );
+        } catch (PDOException $e) {
+            if ($e->getCode() == '45001') {
+                throw new EventFullException("L'événement a atteint le nombre maximum de participants");
+            }
+            if ($e->getCode() == '45002') {
+                throw new PersonAlreadyRegisteredException("Personne déjà inscrite à cet événement");
+            }
+            throw $e;
+        }
     }
 
     public function delete(int $inscriptionId): void
@@ -50,21 +63,5 @@ class MySQLInscriptionRepository implements InscriptionRepositoryInterface
 
         $stmt = $this->pdo->prepare('CALL DesinscrirePersonne(?, ?)');
         $stmt->execute([$inscription['prenom'], $inscription['nom']]);
-    }
-
-    public function createWithCustomDate(int $eventId, string $prenom, string $nom, string $dateInscription): Inscription
-    {
-        $stmt = $this->pdo->prepare('CALL InscrirePersonneMigration(?, ?, ?, ?)');
-        $stmt->execute([$eventId, $prenom, $nom, $dateInscription]);
-
-        $row = $stmt->fetch(PDO::FETCH_ASSOC);
-
-        return new Inscription(
-            $row['id'],
-            $row['evenement_id'],
-            $row['prenom'],
-            $row['nom'],
-            new \DateTime($row['date_inscription'])
-        );
     }
 }

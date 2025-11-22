@@ -2,6 +2,8 @@
 
 namespace EventApp\Infrastructure\Controller;
 
+use EventApp\Domain\Exception\EventFullException;
+use EventApp\Domain\Exception\PersonAlreadyRegisteredException;
 use EventApp\Infrastructure\DTO\CreateInscriptionDTO;
 use EventApp\Infrastructure\Repository\MySQLInscriptionRepository;
 use EventApp\Infrastructure\Database\DatabaseConnection;
@@ -24,8 +26,14 @@ class InscriptionController
             $_POST['nom']
         );
 
-        $this->inscriptionRepository->create($inscriptionDTO);
-        $this->redirect('/');
+        try {
+            $this->inscriptionRepository->create($inscriptionDTO);
+            $this->redirect('/?success=inscription_created');
+        } catch (PersonAlreadyRegisteredException $e) {
+            $this->redirect('/?error=already_registered');
+        } catch (EventFullException $e) {
+            $this->redirect('/?error=event_full');
+        }
     }
 
     public function delete(): void

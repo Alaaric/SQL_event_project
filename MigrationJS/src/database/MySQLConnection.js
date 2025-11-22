@@ -26,16 +26,9 @@ export class MySQLConnection {
         return idResult[0].id;
     }
 
-    async createInscription(eventId, prenom, nom) {
+    async createInscription(eventId, prenom, nom, dateInscription = null) {
         await this.connection.execute(
-            'CALL InscrirePersonne(?, ?, ?)',
-            [eventId, prenom, nom]
-        );
-    }
-
-    async createInscriptionWithDate(eventId, prenom, nom, dateInscription) {
-        await this.connection.execute(
-            'CALL InscrirePersonneMigration(?, ?, ?, ?)',
+            'CALL InscrirePersonne(?, ?, ?, ?)',
             [eventId, prenom, nom, dateInscription]
         );
     }

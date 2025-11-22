@@ -8,6 +8,31 @@
 <body>
     <h1>Gestion d'Événements</h1>
 
+    <?php if (isset($_GET['error'])): ?>
+        <div style="background: #f8d7da; border: 1px solid #f5c6cb; padding: 10px; margin: 10px 0; border-radius: 5px; color: #721c24;">
+            <strong>Erreur:</strong>
+            <?php
+            $errorMessages = [
+                'already_registered' => 'Cette personne est déjà inscrite à cet événement',
+                'event_full' => 'L\'événement a atteint le nombre maximum de participants',
+            ];
+            echo htmlspecialchars($errorMessages[$_GET['error']] ?? 'Une erreur est survenue');
+            ?>
+        </div>
+    <?php endif; ?>
+
+    <?php if (isset($_GET['success'])): ?>
+        <div style="background: #d4edda; border: 1px solid #c3e6cb; padding: 10px; margin: 10px 0; border-radius: 5px; color: #155724;">
+            <strong>Succès:</strong>
+            <?php
+            $successMessages = [
+                'inscription_created' => 'Inscription créée avec succès !',
+            ];
+            echo htmlspecialchars($successMessages[$_GET['success']] ?? 'Opération réussie');
+            ?>
+        </div>
+    <?php endif; ?>
+
     <?php if (isset($migrated)): ?>
         <div style="background: #d4edda; border: 1px solid #c3e6cb; padding: 10px; margin: 10px 0; border-radius: 5px;">
             <h2>Migration OK</h2>
