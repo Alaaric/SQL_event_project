@@ -26,10 +26,10 @@ export class MySQLConnection {
         return idResult[0].id;
     }
 
-    async createInscription(eventId, prenom, nom) {
+    async createInscription(eventId, prenom, nom, dateInscription = null) {
         await this.connection.execute(
-            'CALL InscrirePersonne(?, ?, ?)',
-            [eventId, prenom, nom]
+            'CALL InscrirePersonne(?, ?, ?, ?)',
+            [eventId, prenom, nom, dateInscription]
         );
     }
 }

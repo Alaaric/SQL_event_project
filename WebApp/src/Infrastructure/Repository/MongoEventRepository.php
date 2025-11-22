@@ -4,23 +4,36 @@ namespace EventApp\Infrastructure\Repository;
 
 use EventApp\Domain\Interfaces\MongoEventRepositoryInterface;
 use MongoDB\Client as MongoClient;
+use MongoDB\Collection;
 
 class MongoEventRepository implements MongoEventRepositoryInterface
 {
+    private const COLLECTION_NAME = 'events';
+    private Collection $collection;
+
     public function __construct(
-        private MongoClient $mongoClient,
-        private string $databaseName = 'event_management',
-        private string $collectionName = 'events'
-    ) {}
+        private MongoClient $mongoClient
+    ) {
+        $databaseName = $_ENV['MONGODB_DATABASE'];
+        $this->collection = $this->mongoClient->{$databaseName}->{self::COLLECTION_NAME};
+    }
 
     public function findAllRawEvents(): array
     {
-        $collection = $this->mongoClient->{$this->databaseName}->{$this->collectionName};
-        $events = iterator_to_array($collection->find());
+        $events = iterator_to_array($this->collection->find(['migrated' => ['$ne' => true]]));
 
-        return array_map(
-            fn($mongoEvent) => json_decode(json_encode($mongoEvent->bsonSerialize()), true),
-            $events
+        return array_map(function ($mongoEvent) {
+            $data = json_decode(json_encode($mongoEvent->bsonSerialize()), true);
+            $data['_id_object'] = $mongoEvent->_id;
+            return $data;
+        }, $events);
+    }
+
+    public function markAsMigrated($eventId): void
+    {
+        $this->collection->updateOne(
+            ['_id' => $eventId],
+            ['$set' => ['migrated' => true]]
         );
     }
 }

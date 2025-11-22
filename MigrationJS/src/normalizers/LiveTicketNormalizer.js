@@ -16,7 +16,8 @@ export class LiveTicketNormalizer {
     extractInscriptions(data) {
         return (data.attendees || []).map(attendee => ({
             prenom: attendee.fn,
-            nom: attendee.ln
+            nom: attendee.ln,
+            dateInscription: attendee.when || null
         }));
     }
 }

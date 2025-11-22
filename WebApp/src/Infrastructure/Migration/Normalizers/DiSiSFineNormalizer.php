@@ -35,9 +35,14 @@ class DiSiSFineNormalizer implements EventNormalizerInterface
         $normalized = [];
         foreach ($decoded as $att) {
             if (is_array($att) && count($att) >= 2) {
-                $normalized[] = ['prenom' => $att[0], 'nom' => $att[1]];
+                $normalized[] = [
+                    'prenom' => trim($att[0]),
+                    'nom' => trim($att[1]),
+                    'date_inscription' => trim($att[2])
+                ];
             }
         }
+
         return $normalized;
     }
 }

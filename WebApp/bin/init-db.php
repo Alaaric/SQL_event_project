@@ -31,7 +31,7 @@ passthru($mysqlCmd, $returnCode);
 unlink($tempSqlFile);
 
 if ($returnCode === 0) {
-    echo "Base de données créée !\n";
+    echo "Base de données créée\n";
     echo "On peu maintenant lancer l'application :\n";
     echo "php -S localhost:8000 -t public\n
     OU\n

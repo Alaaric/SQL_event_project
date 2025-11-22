@@ -23,6 +23,7 @@ Avant tout, faire des `.env.local` si besoin
 make install
 
 # Initialisation de la base MySQL
+# Le mot de passe de votre utilisateur admin renseigné dans le .env est demandé (root par defaut) pour initialiser la base de donnée et créer l'utilisateur Mysql de l'app
 make init-db
 
 # Démarrage de l'application web
@@ -124,7 +125,7 @@ SQL_event_project/
 │   ├── public/        # Point d'entrée web
 │   ├── src/           
 │   │   ├── Domain/    # Entités et interfaces
-│   │   └── Infrastructure/ # Controllers, repos, vues, normalizers
+│   │   └── Infrastructure/ # Controllers, repos,...
 │   └── bin/           # Scripts CLI PHP
 ├── MigrationJS/       # Migration CLI Node.js
 │   └── src/
@@ -143,5 +144,5 @@ make install    # Installation complète des 2 modules
 make init-db    # Initialisation MySQL
 make start      # Démarrage serveur web
 make import IMPORT_FILE=fichier.json # Import d'événement dans MongoDB
-make migrate
+make migrate    # Migration des evenements de MongoDB vers MySQL avec le script JS
 ```
