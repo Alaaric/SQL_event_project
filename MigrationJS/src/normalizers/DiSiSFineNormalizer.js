@@ -19,7 +19,8 @@ export class DISISFineNormalizer {
             const attendeesList = JSON.parse(data.attendees);
             return attendeesList.map(attendee => ({
                 prenom: attendee[0],
-                nom: attendee[1]
+                nom: attendee[1],
+                dateInscription: attendee[2] || null
             }));
         } catch {
             return [];

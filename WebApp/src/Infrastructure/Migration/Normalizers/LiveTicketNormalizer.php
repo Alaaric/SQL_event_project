@@ -26,7 +26,11 @@ class LiveTicketNormalizer implements EventNormalizerInterface
         $normalized = [];
         foreach ($attendees as $attendee) {
             if (isset($attendee['fn'], $attendee['ln'])) {
-                $normalized[] = ['prenom' => $attendee['fn'], 'nom' => $attendee['ln']];
+                $normalized[] = [
+                    'prenom' => $attendee['fn'],
+                    'nom' => $attendee['ln'],
+                    'date_inscription' => $attendee['when']
+                ];
             }
         }
         return $normalized;

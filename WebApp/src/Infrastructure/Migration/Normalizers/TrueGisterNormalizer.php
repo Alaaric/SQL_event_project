@@ -27,7 +27,11 @@ class TrueGisterNormalizer implements EventNormalizerInterface
         $normalized = [];
         foreach ($attendees as $attendee) {
             if (isset($attendee['attendee_1'], $attendee['attendee_2'])) {
-                $normalized[] = ['prenom' => $attendee['attendee_1'], 'nom' => $attendee['attendee_2']];
+                $normalized[] = [
+                    'prenom' => $attendee['attendee_1'],
+                    'nom' => $attendee['attendee_2'],
+                    'date_inscription' => null
+                ];
             }
         }
         return $normalized;

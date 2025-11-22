@@ -34,6 +34,9 @@ class MongoToMySQLMigrator
             try {
                 $normalizedData = $this->normalizeEvent($eventArray);
                 $this->createEventWithInscriptions($normalizedData);
+
+                $this->mongoEventRepository->markAsMigrated($eventArray['_id_object']);
+
                 $migrated++;
             } catch (\Exception $e) {
                 $errors[] = $e->getMessage();
@@ -73,7 +76,10 @@ class MongoToMySQLMigrator
                 $attendee['nom']
             );
 
-            $this->inscriptionRepository->create($inscriptionDTO);
+            $this->inscriptionRepository->create(
+                $inscriptionDTO,
+                $attendee['date_inscription'] ?? null
+            );
         }
     }
 }

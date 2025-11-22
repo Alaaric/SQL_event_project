@@ -17,7 +17,8 @@ export class TrueGisterNormalizer {
     extractInscriptions(data) {
         return (data.results[0].attendees || []).map(attendee => ({
             prenom: attendee.attendee_1,
-            nom: attendee.attendee_2
+            nom: attendee.attendee_2,
+            dateInscription: null
         }));
     }
 }
